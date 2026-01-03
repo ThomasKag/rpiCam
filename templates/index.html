@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pi Camera Stream</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        img {
+            max-width: 100%;
+            border: 2px solid #333;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #ccc;
+            white-space: nowrap;
+        }
+
+        .label {
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <img src="/video_feed" />
+
+    <div class="status">
+        <span class="label">Time:</span>
+        <span id="time">--</span>
+        &nbsp;|&nbsp;
+        <span class="label">Temp:</span>
+        <span id="temp">--</span> °C
+        &nbsp;|&nbsp;
+        <span class="label">Humidity:</span>
+        <span id="hum">--</span> %
+    </div>
+</div>
+
+<script>
+function updateStatus() {
+    fetch("/status")
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("time").textContent = data.time;
+            document.getElementById("temp").textContent =
+                data.temperature !== null ? data.temperature : "N/A";
+            document.getElementById("hum").textContent =
+                data.humidity !== null ? data.humidity : "N/A";
+        })
+        .catch(() => {
+            document.getElementById("temp").textContent = "N/A";
+            document.getElementById("hum").textContent = "N/A";
+        });
+}
+
+setInterval(updateStatus, 1000);
+updateStatus();
+</script>
+</body>
+</html>
