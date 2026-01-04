@@ -129,7 +129,7 @@ def dht_worker():
 
         time.sleep(3)  # IMPORTANT: do not go faster
 
-# Sensor status endpoint
+# Sensor endpoints
 @app.route("/status")
 def status():
     with sensor_lock:
@@ -141,6 +141,26 @@ def status():
         "temperature": None if temperature is None else round(temperature, 1),
         "humidity": None if humidity is None else round(humidity, 1)
     })
+
+import json
+
+@app.route("/sensor_data")
+def sensor_data():
+    data = []
+
+    if not os.path.exists(CSV_PATH):
+        return Response(json.dumps(data), mimetype="application/json")
+
+    with open(CSV_PATH, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            data.append({
+                "timestamp": int(row["timestamp"]),
+                "temperature": float(row["temperature"]),
+                "humidity": float(row["humidity"])
+            })
+
+    return Response(json.dumps(data), mimetype="application/json")
 
 # csv rename during startup
 def init_sensor_csv():
